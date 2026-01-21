@@ -13,9 +13,9 @@
 
 <div class="row">
     <div class="col">
-        <form action="/resident/{{ $resident->id}}" method="post">
-            @csrf
-            @method('PUT')
+       <form action="{{ route('resident.update', $resident->id) }}" method="post">
+    @csrf
+    @method('PUT')
             <div class="card">
                 <div class="card-body">
                     <div class="form-group mb-3">
@@ -90,11 +90,10 @@
                     @enderror
                 </div>
 
-                    <div class="form-group mb-3">
                 <div class="form-group mb-3">
                 <label for="religion">Agama</label>
-                <input type="text" name="religion" id="religion" class="form-control @error('religion') is-invalid @enderror" value="
-                {{ old('religion',$resident->religion) }}">
+                <input type="text" name="religion" id="religion" class="form-control @error('religion') is-invalid @enderror" 
+                value="{{ old('religion',$resident->religion) }}">
                 
                 @error('religion')
                     <span class="invalid-feedback">
@@ -147,7 +146,7 @@
                     <div class="form-group mb-3">
                     <label for="phone">Telepon</label>
                     <input type="text" inputmode="numeric" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" 
-                    value="{{ old('phone',$resident->occupation) }}">
+                    value="{{ old('phone',$resident->phone) }}">
                     
                     @error('phone')
                         <span class="invalid-feedback">
@@ -189,7 +188,7 @@
                     <div class="d-flex justify-content-end" style="gap:10px;">
                         <a href="/resident" class="btn btn-outline-secondary">
                         kembali
-                    </a>
+                    </a>?
                         <button type="submit" class="btn btn-warning">
                              simpan perubahan
                         </button>

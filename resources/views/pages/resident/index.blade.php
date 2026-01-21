@@ -18,6 +18,7 @@
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>NIK</th>
                                 <th>Nama</th>
                                 <th>Jenis Kelamin</th>
@@ -44,6 +45,7 @@
                             <tbody>
                                 @foreach ($residents as $item)
                                     <tr>
+                                        <td>{{ $loop->iteration}}</td>
                                         <td>{{ $item->nik }}</td>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->gender }}</td>
@@ -56,10 +58,9 @@
                                         <td>{{ $item->status }}</td>
                                         <td>
                                             <div class="d-flex">
-                                                <a href="/resident/{{ $item->id }}/edit"
-                                                   class="btn btn-sm btn-warning mr-2">
-                                                    <i class="fas fa-pen"></i>
-                                                </a>
+                                               <a href="{{ route('resident.edit', $item->id) }}" class="btn btn-sm btn-warning mr-2">
+                                                <i class="fas fa-pen"></i> Edit </a>
+                                                                                    
 
                                                 <button type="button"
                                                     class="btn btn-sm btn-danger"
