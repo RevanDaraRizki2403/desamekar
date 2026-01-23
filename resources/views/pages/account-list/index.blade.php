@@ -46,25 +46,22 @@
                             @endif
                         </td>
                         <td>
-                            {{-- Tombol diletakkan di dalam <td> aksi agar sejajar --}}
                             <div class="d-flex justify-content-center" style="gap:10px;">
-                                        @if ($item->status == 'approved')
-                                        <button type="button" 
-                                    class="btn btn-sm btn-outline-danger" 
-                                    data-toggle="modal" 
-                                    data-target="#reject{{ $item->id }}">
-                                    Non-Aktifkan
-                                </button>
-                                    @else
-                                        <button type="button" 
-                                    class="btn btn-sm btn-outline-success" 
-                                    data-toggle="modal" 
-                                    data-target="#approve{{ $item->id }}">
-                                    Aktifkan
-                                </button>
-                                    @endif
-                                
-                                
+                                @if ($item->status == 'approved')
+                                    <button type="button" 
+                                        class="btn btn-sm btn-outline-danger" 
+                                        data-toggle="modal" 
+                                        data-target="#reject{{ $item->id }}">
+                                        Non-Aktifkan
+                                    </button>
+                                @else
+                                    <button type="button" 
+                                        class="btn btn-sm btn-outline-success" 
+                                        data-toggle="modal" 
+                                        data-target="#approve{{ $item->id }}">
+                                        Aktifkan
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -82,52 +79,55 @@
 {{-- --- AREA MODAL --- --}}
 @foreach ($users as $item)
 
-    {{-- Meaktifkan --}}
+    {{-- Modal Mengaktifkan Akun --}}
     <div class="modal fade" id="approve{{ $item->id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="POST" action="{{ route('account.aktifkan', $item->id) }}">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Aktifkan Akun</h5>
-                    <button class="close" data-dismiss="modal">×</button>
+        <div class="modal-dialog">
+            <form method="POST" action="{{ route('account.aktifkan', $item->id) }}">
+                @csrf
+                {{-- Validasi Keamanan: Input hidden 'for' dengan value 'activate' --}}
+                <input type="hidden" name="for" value="activate">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Aktifkan Akun</h5>
+                        <button class="close" data-dismiss="modal">×</button>
+                    </div>
+                    <div class="modal-body text-center">
+                        Aktifkan kembali akun <strong>{{ $item->name }}</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Aktifkan</button>
+                    </div>
                 </div>
-                <div class="modal-body text-center">
-                    Aktifkan kembali akun <strong>{{ $item->name }}</strong>?
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-success">Aktifkan</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-
-    {{-- Menonaktifkan akun --}}
+    {{-- Modal Menonaktifkan akun --}}
     <div class="modal fade" id="reject{{ $item->id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="POST" action="{{ route('account.nonaktif', $item->id) }}">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nonaktifkan Akun</h5>
-                    <button class="close" data-dismiss="modal">×</button>
+        <div class="modal-dialog">
+            <form method="POST" action="{{ route('account.nonaktif', $item->id) }}">
+                @csrf
+                {{-- Validasi Keamanan: Input hidden 'for' dengan value 'deactivate' --}}
+                <input type="hidden" name="for" value="deactivate">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nonaktifkan Akun</h5>
+                        <button class="close" data-dismiss="modal">×</button>
+                    </div>
+                    <div class="modal-body text-center">
+                        Nonaktifkan akun <strong>{{ $item->name }}</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Nonaktifkan</button>
+                    </div>
                 </div>
-                <div class="modal-body text-center">
-                    Nonaktifkan akun <strong>{{ $item->name }}</strong>?
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-danger">Nonaktifkan</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
-
-
 @endforeach
 
 @endsection

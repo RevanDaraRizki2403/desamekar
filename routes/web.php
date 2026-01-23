@@ -62,6 +62,8 @@ Route::middleware('role:Admin')->group(function () {
     Route::post('/account-list/nonaktif/{id}', [UserController::class, 'account_nonaktif'])
         ->name('account.nonaktif');
 
+    Route::get('/user/{id}', [UserController::class, 'show'])
+    ->name('user.show');
 });
 
 });
