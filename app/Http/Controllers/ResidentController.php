@@ -10,7 +10,8 @@ class ResidentController extends Controller
 {
     public function index()
     {
-        $residents = Resident::with('user')->get();
+        // Mengambil data penduduk beserta akun usernya jika ada
+        $residents = Resident::with('user')->latest()->get();
          
         return view('pages.resident.index', [
             'residents' => $residents,
@@ -24,25 +25,18 @@ class ResidentController extends Controller
 
     public function store(Request $request)
     {
+        // PERBAIKAN: Validasi hanya untuk kolom yang masih ada di database
         $validatedData = $request->validate([
-            // Gunakan 'digits:16' untuk memastikan NIK tepat 16 karakter angka
-            'nik'            => ['required', 'digits:16', 'unique:residents,nik'],
-            'name'           => ['required', 'max:100'],
-            'gender'         => ['required', Rule::in(['male', 'female'])],
-            'birth_date'     => ['required', 'date'], // Sebaiknya validasi sebagai 'date'
-            'birth_place'    => ['required', 'max:100'],
-            'address'        => ['required', 'max:700'],
-            'religion'       => ['nullable', 'max:50'],
-            'marital_status' => ['required', Rule::in(['single', 'married', 'divorced', 'widowed'])],
-            'occupation'     => ['nullable', 'max:100'],
-            'phone'          => ['nullable', 'max:15'],
-            'status'         => ['required', Rule::in(['active', 'moved', 'deceased'])],
+            'nik'    => ['required', 'digits:16', 'unique:residents,nik'],
+            'name'   => ['required', 'string', 'max:100'],
+            'gender' => ['required', Rule::in(['male', 'female'])],
+            'status' => ['required', Rule::in(['active', 'moved', 'deceased'])],
         ]);
 
+        // Menyimpan data yang sudah divalidasi
         Resident::create($validatedData);
 
-        // Gunakan redirect ke route name agar lebih aman
-        return redirect()->route('resident.index')->with('success', 'Berhasil menambahkan data');
+        return redirect()->route('resident.index')->with('success', 'Berhasil menambahkan data penduduk.');
     }
 
     public function edit($id)
@@ -56,26 +50,20 @@ class ResidentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $resident = Resident::findOrFail($id);
-
+        // PERBAIKAN: Validasi update disesuaikan dengan atribut baru
         $validatedData = $request->validate([
-            // Tambahkan ignore ID pada unique agar NIK sendiri tidak dianggap duplikat saat update
-            'nik'            => ['required', 'digits:16', Rule::unique('residents')->ignore($resident->id)],
-            'name'           => ['required', 'max:100'],
-            'gender'         => ['required', Rule::in(['male', 'female'])],
-            'birth_date'     => ['required', 'date'],
-            'birth_place'    => ['required', 'max:100'],
-            'address'        => ['required', 'max:700'],
-            'religion'       => ['nullable', 'max:50'],
-            'marital_status' => ['required', Rule::in(['single', 'married', 'divorced', 'widowed'])],
-            'occupation'     => ['nullable', 'max:100'],
-            'phone'          => ['nullable', 'max:15'],
-            'status'         => ['required', Rule::in(['active', 'moved', 'deceased'])],
+            'nik'    => ['required', 'digits:16', Rule::unique('residents')->ignore($id)],
+            'name'   => ['required', 'string', 'max:100'],
+            'gender' => ['required', Rule::in(['male', 'female'])],
+            'status' => ['required', Rule::in(['active', 'moved', 'deceased'])],
         ]);
 
+        $resident = Resident::findOrFail($id);
+        
+        // Melakukan update data
         $resident->update($validatedData);
 
-        return redirect()->route('resident.index')->with('success', 'Berhasil mengubah data');
+        return redirect()->route('resident.index')->with('success', 'Data penduduk berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -83,6 +71,6 @@ class ResidentController extends Controller
         $resident = Resident::findOrFail($id);
         $resident->delete();
 
-        return redirect()->route('resident.index')->with('success', 'Berhasil menghapus data');
+        return redirect()->route('resident.index')->with('success', 'Berhasil menghapus data penduduk.');
     }
 }

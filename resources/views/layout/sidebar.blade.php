@@ -21,13 +21,23 @@ $menus = [
             'path'  => 'account-request',
             'icon'  => 'fas fa-fw fa-user',
         ],
+        (object)[
+            'title' => 'Aduan Warga',
+            'path'  => 'Aduan',
+            'icon'  => 'fas fa-fw fa-scroll',
+        ],
     ],
-
+    
     2 => [
         (object)[
             'title' => 'Dashboard',
             'path'  => 'dashboard',
             'icon'  => 'fas fa-fw fa-tachometer-alt',
+        ],
+         (object)[
+            'title' => 'Pengaduan',
+            'path'  => 'Aduan',
+            'icon'  => 'fas fa-fw fa-scroll',
         ],
     ],
 ];

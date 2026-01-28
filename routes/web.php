@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\AduanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\UserController;
+use App\Models\Resident;
+use App\Models\Aduan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,12 +21,28 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD
+| DASHBOARD (DIPERBAIKI DENGAN LOGIKA DATA)
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard', function () {
-    return view('pages.dashboard');
-})->middleware('role:Admin,User');
+    // Menghitung statistik untuk ditampilkan di kartu dashboard
+    $total_penduduk = Resident::count();
+    $total_aduan    = Aduan::count();
+    $aduan_proses   = Aduan::where('status', 'processing')->count();
+    $aduan_selesai  = Aduan::where('status', 'completed')->count();
+
+    // Ambil 5 aktivitas pengaduan terbaru
+    $recent_aduan   = Aduan::with('resident')->latest()->take(5)->get();
+
+    // Mengirimkan semua data ke view dashboard
+    return view('pages.dashboard', compact(
+        'total_penduduk', 
+        'total_aduan', 
+        'aduan_proses', 
+        'aduan_selesai', 
+        'recent_aduan'
+    ));
+})->middleware('auth')->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
@@ -51,8 +70,6 @@ Route::middleware('role:Admin')->group(function () {
     Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])
         ->name('account.approval');
       
-Route::middleware('role:Admin')->group(function () {
-
     Route::get('/account-list', [UserController::class, 'account_list_view'])
         ->name('account.list');
 
@@ -63,7 +80,29 @@ Route::middleware('role:Admin')->group(function () {
         ->name('account.nonaktif');
 
     Route::get('/user/{id}', [UserController::class, 'show'])
-    ->name('user.show');
+        ->name('user.show');
 });
 
+/*
+|--------------------------------------------------------------------------
+| ADUAN (ADMIN & USER)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('role:Admin,User')->group(function () {
+    Route::get('/Aduan', [AduanController::class, 'index'])->name('Aduan.index');
+    Route::get('/Aduan/create', [AduanController::class, 'create'])->name('Aduan.create');
+    Route::post('/Aduan', [AduanController::class, 'store'])->name('Aduan.store');
+    Route::get('/Aduan/{id}/edit', [AduanController::class, 'edit'])->name('Aduan.edit');
+    Route::put('/Aduan/{id}', [AduanController::class, 'update'])->name('Aduan.update');
+    Route::delete('/Aduan/{id}', [AduanController::class, 'destroy'])->name('Aduan.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| UPDATE STATUS ADUAN (ADMIN ONLY)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('role:Admin')->group(function () {
+    // Rute update status dan tanggapan admin desa
+    Route::post('/aduan/update-status/{id}', [AduanController::class, 'update_status'])->name('Aduan.update_status');
 });

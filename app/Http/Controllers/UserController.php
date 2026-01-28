@@ -5,15 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule; // Tambahkan ini untuk validasi Rule
+use Illuminate\Validation\Rule; 
 
 class UserController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | ACCOUNT REQUEST (PERMINTAAN AKUN BARU)
-    |--------------------------------------------------------------------------
-    */
     public function account_request_view()
     {
         $users = User::where('status', 'submitted')->get();
@@ -23,36 +18,33 @@ class UserController extends Controller
     }
 
     public function account_approval(Request $request, $id)
-    {
-        // 1. Tambahkan validasi untuk resident_id (opsional/nullable)
-        $request->validate([
-            'for' => ['required', Rule::in(['approve', 'reject'])],
-            'user_id' => ['nullable', 'exists:residents,id'] 
-        ]);
+{
+    $request->validate([
+        'for' => ['required', Rule::in(['approve', 'reject'])],
+        'resident_id' => ['nullable', 'exists:residents,id']
+    ]);
 
-        $user = User::findOrFail($id);
+    $user = User::findOrFail($id);
 
-        if ($request->for === 'approve') {
-            $user->status = 'approved';
-            
-            // 2. Logika untuk mengaitkan data penduduk jika dipilih
-            if ($request->has('resident_id') && $request->resident_id != null) {
-                // Cari data penduduk berdasarkan ID yang dipilih
-                $resident = Resident::findOrFail($request->resident_id);
-                
-                // Update kolom user_id pada tabel residents
-                $resident->user_id = $user->id;
-                $resident->save();
-            }
-        } else {
-            $user->status = 'rejected';
+    if ($request->for === 'approve') {
+        $user->status = 'approved';
+
+        if ($request->filled('resident_id')) {
+            $resident = Resident::findOrFail($request->resident_id);
+            $resident->user_id = $user->id;
+            $resident->save();
         }
 
-        $user->save();
+    } else {
+        $user->status = 'rejected';
+    }
 
-        return redirect()->route('account.request')
-            ->with('success', 'Status akun berhasil diperbarui');
-        }
+    $user->save();
+
+    return redirect()
+        ->route('account.request')
+        ->with('success', 'Status akun berhasil diperbarui');
+}
 
     /*
     |--------------------------------------------------------------------------
