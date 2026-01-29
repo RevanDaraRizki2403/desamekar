@@ -1,96 +1,63 @@
- @php
+@php
 $menus = [
+    // ROLE ADMIN
     1 => [
-        (object)[
-            'title' => 'Dashboard',
-            'path'  => 'dashboard',
-            'icon'  => 'fas fa-fw fa-tachometer-alt',
+        'MENU UTAMA' => [
+            (object)['title' => 'Dashboard', 'path' => 'dashboard', 'icon' => 'fas fa-fw fa-tachometer-alt'],
         ],
-        (object)[
-            'title' => 'Penduduk',
-            'path'  => 'resident',
-            'icon'  => 'fas fa-fw fa-table',
+        'MANAJEMEN DATA' => [
+            (object)['title' => 'Data Penduduk', 'path' => 'resident', 'icon' => 'fas fa-fw fa-users'],
+            (object)['title' => 'Daftar Akun', 'path' => 'account-list', 'icon' => 'fas fa-fw fa-user-check'],
+            (object)['title' => 'Permintaan Akun', 'path' => 'account-request', 'icon' => 'fas fa-fw fa-user-plus'],
         ],
-        (object)[
-            'title' => 'Daftar Akun',
-            'path'  => 'account-list',
-            'icon'  => 'fas fa-fw fa-user',
-        ],
-        (object)[
-            'title' => 'Permintaan Akun',
-            'path'  => 'account-request',
-            'icon'  => 'fas fa-fw fa-user',
-        ],
-        (object)[
-            'title' => 'Aduan Warga',
-            'path'  => 'Aduan',
-            'icon'  => 'fas fa-fw fa-scroll',
+        'PELAYANAN' => [
+            (object)['title' => 'Aduan Warga', 'path' => 'Aduan', 'icon' => 'fas fa-fw fa-bullhorn'],
+            (object)['title' => 'Pengajuan Masuk', 'path' => 'pengajuan-masuk', 'icon' => 'fas fa-fw fa-envelope-open-text'],
         ],
     ],
-    
+    // ROLE WARGA
     2 => [
-        (object)[
-            'title' => 'Dashboard',
-            'path'  => 'dashboard',
-            'icon'  => 'fas fa-fw fa-tachometer-alt',
+        'MENU UTAMA' => [
+            (object)['title' => 'Dashboard', 'path' => 'dashboard', 'icon' => 'fas fa-fw fa-tachometer-alt'],
         ],
-         (object)[
-            'title' => 'Pengaduan',
-            'path'  => 'Aduan',
-            'icon'  => 'fas fa-fw fa-scroll',
+        'LAYANAN MANDIRI' => [
+            (object)['title' => 'Pengaduan', 'path' => 'Aduan', 'icon' => 'fas fa-fw fa-comments'],
+            (object)['title' => 'Pengajuan Dokumen', 'path' => 'Ajuan', 'icon' => 'fas fa-fw fa-file-signature'],
         ],
     ],
 ];
 @endphp
 
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/dashboard">
+        <div class="sidebar-brand">
+        </div>
+        <div class="sidebar-brand-text mx-3">DESA <sup>SIRNAMEKAR</sup></div>
+    </a>
 
- 
- <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    <hr class="sidebar-divider my-0">
 
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/dashboard">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    {{-- <i class="fas fa-laugh-wink"></i> --}}
-                </div>
-                <div class="sidebar-brand-text mx-3">Desa Sirnamekar</div>
-            </a>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
-
-            <!-- Nav Item - Dashboard -->
-            {{-- <li class="nav-item {{ request()->is('dashboard') ? 'active':'' }}">
-                <a class="nav-link" href="/dashboard">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
-            </li> --}}
-
-            <!-- Divider -->
-            {{-- <hr class="sidebar-divider"> --}}
-
-            <!-- Heading -->
-            {{-- <div class="sidebar-heading">
-                keperluan
-            </div> --}}
-
-            <!-- Nav Item - Tables -->
-            @auth
-                @foreach ($menus [auth()->user()->role_id] as $menu)
-            <li class="nav-item {{ request()->is($menu->path .'*') ? 'active':'' }}">
-                <a class="nav-link" href="/{{ $menu->path}}">
-                    <i class="{{ $menu->icon }}"></i>
-                    <span>{{ $menu->title}}</span></a>
-            </li>
-            @endforeach
-            @endauth
-            
-
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    @auth
+        @foreach ($menus[auth()->user()->role_id] as $heading => $group)
+            <div class="sidebar-heading mt-3">
+                {{ $heading }}
             </div>
-        </ul>
+
+            @foreach ($group as $menu)
+                <li class="nav-item {{ request()->is($menu->path .'*') ? 'active' : '' }}">
+                    <a class="nav-link py-2" href="/{{ $menu->path }}">
+                        <i class="{{ $menu->icon }}"></i>
+                        <span>{{ $menu->title }}</span>
+                    </a>
+                </li>
+            @endforeach
+            
+            <hr class="sidebar-divider">
+        @endforeach
+    @endauth
+
+    <div class="text-center d-none d-md-inline mt-4">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>

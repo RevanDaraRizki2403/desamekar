@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resident extends Model
 {
-    protected $table = 'residents';
+    protected $guarded = [];
 
-    // Gunakan fillable hanya untuk kolom yang masih ada di database
-    protected $fillable = ['nik', 'name', 'gender', 'status'];
+    // Tambahkan ini agar {{ $resident->nama }} bisa berfungsi
+    public function getNamaAttribute()
+    {
+        return $this->name; 
+    }
 
-    /**
-     * Relasi ke User (Satu penduduk memiliki satu akun user)
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -26,4 +26,10 @@ class Resident extends Model
     {
         return $this->hasMany(Aduan::class, 'resident_id');
     }
+
+    public function pengajuanDokumen()
+{
+    return $this->hasMany(PengajuanDokumen::class, 'resident_id');
+}
+
 }
