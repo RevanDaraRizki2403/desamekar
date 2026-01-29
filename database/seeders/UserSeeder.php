@@ -39,10 +39,7 @@ class UserSeeder extends Seeder
             'nik' => '1234567891234567',
             'name' => 'Adam',
             'gender' => 'male',
-            'birth_date' => '2005-01-01',
-            'birth_place' => 'Cirebon',
-            'address' => 'Cirebon',
-            'marital_status' => 'single',
+            'status' => 'active',
         ]);
             }
 

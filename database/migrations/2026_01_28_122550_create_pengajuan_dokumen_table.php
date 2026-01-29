@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('pengajuan_dokumens', function (Blueprint $table) {
+        Schema::create('pengajuan_dokumen', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('resident_id');
             $table->string('jenis_dokumen');
