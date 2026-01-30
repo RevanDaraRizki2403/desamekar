@@ -22,7 +22,7 @@ $menus = [
         ],
         'LAYANAN MANDIRI' => [
             (object)['title' => 'Pengaduan', 'path' => 'Aduan', 'icon' => 'fas fa-fw fa-comments'],
-            (object)['title' => 'Pengajuan Dokumen', 'path' => 'Ajuan', 'icon' => 'fas fa-fw fa-file-signature'],
+            (object)['title' => 'Pengajuan Dokumen', 'path' => 'pengajuan-dokumen', 'icon' => 'fas fa-fw fa-file-signature'],
         ],
     ],
 ];

@@ -53,9 +53,12 @@ class UserController extends Controller
     */
     public function account_list_view()
     {
+        // PERBAIKAN: Ganti get() menjadi paginate(5)
+        // Menampilkan akun warga (role_id 2) yang sudah diproses (bukan submitted)
         $users = User::where('role_id', 2)
             ->where('status', '!=', 'submitted')
-            ->get();
+            ->latest() // Menampilkan akun terbaru di atas
+            ->paginate(5); 
 
         return view('pages.account-list.index', compact('users'));
     }

@@ -10,9 +10,10 @@ class ResidentController extends Controller
 {
     public function index()
     {
-        // Mengambil data penduduk beserta akun usernya jika ada
-        $residents = Resident::with('user')->latest()->get();
-         
+        // PERBAIKAN: Ganti get() menjadi paginate(5)
+        // Tetap gunakan with('user') agar detail akun bisa dilihat tanpa lambat (Eager Loading)
+        $residents = Resident::with('user')->latest()->paginate(5);
+          
         return view('pages.resident.index', [
             'residents' => $residents,
         ]);
@@ -71,6 +72,7 @@ class ResidentController extends Controller
         $resident = Resident::findOrFail($id);
         $resident->delete();
 
-        return redirect()->route('resident.index')->with('success', 'Berhasil menghapus data penduduk.');
+        // Gunakan back() agar posisi halaman pagination tidak hilang setelah hapus
+        return back()->with('success', 'Berhasil menghapus data penduduk.');
     }
 }

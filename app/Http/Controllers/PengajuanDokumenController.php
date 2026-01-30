@@ -9,31 +9,41 @@ use Illuminate\Support\Facades\Storage;
 
 class PengajuanDokumenController extends Controller
 {
-    // WARGA
+    /**
+     * Tampilan Riwayat Pengajuan (Halaman Warga)
+     */
     public function index()
     {
         if (!Auth::user()->resident) {
             return redirect()->route('dashboard')
-                ->with('error_resident','Lengkapi data penduduk terlebih dahulu');
+                ->with('error_resident', 'Lengkapi data penduduk Anda terlebih dahulu di menu profil.');
         }
 
-        $data = PengajuanDokumen::where(
-            'resident_id', Auth::user()->resident->id
-        )->latest()->get();
+        $data = PengajuanDokumen::with('resident')
+            ->where('resident_id', Auth::user()->resident->id)
+            ->latest()
+            ->paginate(5);
 
+        // Menampilkan file index.blade.php (Khusus Warga)
         return view('pages.pengajuan.index', compact('data'));
     }
 
+    /**
+     * Form Buat Pengajuan Baru (Halaman Warga)
+     */
     public function create()
     {
         if (!Auth::user()->resident) {
             return redirect()->route('dashboard')
-                ->with('error_resident','Lengkapi data penduduk terlebih dahulu');
+                ->with('error_resident', 'Lengkapi data penduduk terlebih dahulu sebelum mengajukan dokumen.');
         }
 
         return view('pages.pengajuan.create');
     }
 
+    /**
+     * Proses Simpan Pengajuan (Halaman Warga)
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -42,75 +52,86 @@ class PengajuanDokumenController extends Controller
             'file_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $file = null;
-        if ($request->hasFile('file_pendukung')) {
-            $file = $request->file('file_pendukung')
-                ->store('pengajuan', 'public');
+        $resident = Auth::user()->resident;
+        if (!$resident) {
+            return redirect()->route('dashboard')->with('error', 'Gagal: Data penduduk tidak ditemukan.');
         }
 
-        // Menambahkan user_id agar tidak eror "Field user_id doesn't have a default value"
+        $file = null;
+        if ($request->hasFile('file_pendukung')) {
+            $file = $request->file('file_pendukung')->store('pengajuan', 'public');
+        }
+
         PengajuanDokumen::create([
             'user_id' => Auth::id(), 
-            'resident_id' => Auth::user()->resident->id,
+            'resident_id' => $resident->id,
             'jenis_dokumen' => $request->jenis_dokumen,
             'keperluan' => $request->keperluan,
             'file_pendukung' => $file,
+            'status' => 'diajukan', 
         ]);
 
         return redirect()->route('pengajuan.index')
-            ->with('success','Pengajuan berhasil dikirim');
+            ->with('success', 'Pengajuan dokumen berhasil dikirim ke Admin Desa.');
     }
 
-    
-public function adminIndex()
-{
-   
-    $data = PengajuanDokumen::with('resident')->latest()->get();
-    return view('pages.pengajuan.admin', compact('data'));
-}
+    /**
+     * Tampilan Manajemen Pengajuan (Halaman Admin)
+     */
+    public function adminIndex()
+    {
+        $data = PengajuanDokumen::with('resident')->latest()->paginate(10);
+        
+        // PERBAIKAN: Harus memanggil 'pages.pengajuan.admin' agar tampilan manajemen admin muncul
+        return view('pages.pengajuan.admin', compact('data'));
+    }
 
+    /**
+     * Admin Update Status & Kirim Balasan (Halaman Admin)
+     */
     public function updateStatus(Request $request, $id)
-{
-    $request->validate([
-        'status' => 'required|in:diajukan,diproses,selesai',
-        'catatan_admin' => 'nullable|string',
-        'file_hasil' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-    ]);
+    {
+        $request->validate([
+            'status' => 'required|in:diajukan,diproses,selesai',
+            'catatan_admin' => 'nullable|string',
+            'file_hasil' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
 
-    $pengajuan = PengajuanDokumen::findOrFail($id);
-    
-    $data = [
-        'status' => strtolower(trim($request->status)),
-        'catatan_admin' => $request->catatan_admin
-    ];
+        $pengajuan = PengajuanDokumen::findOrFail($id);
+        
+        $updateData = [
+            'status' => strtolower(trim($request->status)),
+            'catatan_admin' => $request->catatan_admin
+        ];
 
-    if ($request->hasFile('file_hasil')) {
-        // Hapus file lama jika ada (optional)
+        if ($request->hasFile('file_hasil')) {
+            if ($pengajuan->file_hasil) {
+                Storage::disk('public')->delete($pengajuan->file_hasil);
+            }
+            $updateData['file_hasil'] = $request->file('file_hasil')->store('hasil_dokumen', 'public');
+        }
+
+        $pengajuan->update($updateData);
+
+        return back()->with('success', 'Status pengajuan warga telah diperbarui.');
+    }
+
+    /**
+     * Hapus Data Pengajuan
+     */
+    public function destroy($id)
+    {
+        $pengajuan = PengajuanDokumen::findOrFail($id);
+
+        if ($pengajuan->file_pendukung) {
+            Storage::disk('public')->delete($pengajuan->file_pendukung);
+        }
         if ($pengajuan->file_hasil) {
             Storage::disk('public')->delete($pengajuan->file_hasil);
         }
-        $data['file_hasil'] = $request->file('file_hasil')->store('hasil_dokumen', 'public');
+
+        $pengajuan->delete();
+
+        return back()->with('success', 'Data pengajuan telah dihapus permanen.');
     }
-
-    $pengajuan->update($data);
-
-    return back()->with('success', 'Status dan Dokumen berhasil diperbarui');
-}
-
-public function destroy($id)
-{
-    $pengajuan = PengajuanDokumen::findOrFail($id);
-
-    // Hapus file fisik dari storage jika ada agar tidak memenuhi hosting
-    if ($pengajuan->file_pendukung) {
-        Storage::disk('public')->delete($pengajuan->file_pendukung);
-    }
-    if ($pengajuan->file_hasil) {
-        Storage::disk('public')->delete($pengajuan->file_hasil);
-    }
-
-    $pengajuan->delete();
-
-    return back()->with('success', 'Data pengajuan berhasil dihapus');
-}
 }

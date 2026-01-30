@@ -12,6 +12,8 @@ class AduanController extends Controller
 {
    public function index()
 {
+    $aduan = Aduan::latest()->paginate(3); 
+    return view('pages.Aduan.index', compact('aduan'));
     // 1. Jika Admin, tampilkan semua tanpa cek resident
     if (Auth::user()->role_id == 1) { 
         $aduan = Aduan::with('resident')->latest()->paginate(10); 
