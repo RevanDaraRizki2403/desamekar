@@ -1,7 +1,7 @@
 <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>DESA SIRNAMEKAR{{ date('Y')}} </span>
+                        <span>PT.SUMBER MAKANAN SEHAT {{ date('Y')}} </span>
                     </div>
                 </div>
             </footer>

@@ -2,45 +2,45 @@
 
 namespace Database\Seeders;
 
-use App\Models\Resident;
-Use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        User::create([
-            'id' =>1,
-            'name'=> 'Admin',
-            'email'=> 'admin@gmail.com',
-            'password'=> 'password',
-            'status'=> 'approved',
-            'role_id'=> '1',
+        // 1. Akun Admin Farming
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name'     => 'Admin Farming',
+                'password' => Hash::make('12345678'),
+                'status'   => 'approved',
+                'role_id'  => 1,
+            ]
+        );
 
-        ]);
+        // 2. Akun Karyawan Farm
+        User::updateOrCreate(
+            ['email' => 'karyawan@gmail.com'],
+            [
+                'name'     => 'Karyawan Farm',
+                'password' => Hash::make('12345678'),
+                'status'   => 'approved',
+                'role_id'  => 2,
+            ]
+        );
 
-         User::create([
-            'id' =>2,
-            'name'=> 'Penduduk1',
-            'email'=> 'penduduk@gmail.com',
-            'password'=> 'password',
-            'status'=> 'approved',
-            'role_id'=> '2',
-
-        ]);
-
-        Resident::create([
-            'user_id' => 2,
-            'nik' => '1234567891234567',
-            'name' => 'Adam',
-            'gender' => 'male',
-            'status' => 'active',
-        ]);
-            }
-
+        // 3. Akun Manager
+        User::updateOrCreate(
+            ['email' => 'manager@gmail.com'],
+            [
+                'name'     => 'Manager Farm',
+                'password' => Hash::make('12345678'),
+                'status'   => 'approved',
+                'role_id'  => 3,
+            ]
+        );
+    }
 }

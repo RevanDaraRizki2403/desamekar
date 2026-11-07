@@ -15,21 +15,20 @@
     <style>
         body {
             background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
+            padding: 20px 0;
             font-family: 'Nunito', sans-serif;
         }
 
-        /* Container disamakan 450px seperti Login */
         .container {
-            max-width: 450px;
+            max-width: 400px; 
             width: 90%;
         }
 
-        /* Glassmorphism Effect disamakan */
         .card-register {
             border: none;
             border-radius: 20px;
@@ -39,62 +38,62 @@
         }
 
         .img-logo {
-            width: 120px;
+            width: 80px; 
+            height: auto;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
-            transition: transform 0.3s ease;
+            margin-bottom: 10px;
         }
 
         .register-title {
             font-weight: 800;
             color: #4e73df;
+            font-size: 1.4rem;
             letter-spacing: 1px;
-            margin-top: 15px;
+            margin-bottom: 5px;
         }
 
         .form-group-custom {
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 15px; 
         }
 
-        /* Tinggi Input disamakan 55px */
         .form-control-user {
-            height: 55px !important;
-            padding: 10px 20px 10px 50px !important;
+            height: 50px !important;
+            padding: 10px 15px 10px 45px !important;
             border-radius: 12px !important;
             border: 2px solid #eaecf4 !important;
-            font-size: 0.95rem !important;
+            font-size: 0.9rem !important;
             transition: all 0.3s ease;
         }
 
         .form-control-user:focus {
             border-color: #4e73df !important;
-            box-shadow: 0 0 15px rgba(78, 115, 223, 0.1) !important;
+            box-shadow: 0 0 10px rgba(78, 115, 223, 0.1) !important;
         }
 
         .input-icon {
             position: absolute;
-            left: 18px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: #d1d3e2;
             z-index: 10;
-            transition: color 0.3s ease;
+            pointer-events: none;
         }
 
         .form-control-user:focus + .input-icon {
             color: #4e73df;
         }
 
-        /* Tombol disamakan tinggi dan warnanya */
         .btn-daftar {
             background: linear-gradient(to right, #4e73df, #224abe) !important;
             border: none !important;
-            height: 55px;
+            height: 50px;
             border-radius: 12px !important;
             font-weight: 700 !important;
-            font-size: 1rem !important;
-            letter-spacing: 1px;
+            font-size: 0.95rem !important;
             text-transform: uppercase;
+            letter-spacing: 1px;
             transition: all 0.3s ease !important;
         }
 
@@ -106,21 +105,20 @@
         .login-link {
             font-weight: 700;
             color: #fff;
+            opacity: 0.9;
+            font-size: 0.9rem;
             text-decoration: none;
-            transition: all 0.3s;
-            opacity: 0.8;
         }
 
         .login-link:hover {
             opacity: 1;
-            text-decoration: none;
-            color: #f8f9fc;
+            text-decoration: underline;
         }
 
         .footer-text {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.8rem;
-            margin-top: 30px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.75rem;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -129,26 +127,26 @@
     <div class="container">
         <div class="card card-register shadow-lg">
             <div class="card-body p-0">
-                <div class="p-5">
+                <div class="p-4 p-md-5"> {{-- Padding disesuaikan --}}
                     <div class="text-center mb-4">
                         <img src="{{ asset('templet/img/logo desaa.png') }}" class="img-logo" alt="Logo Desa">
                         <h2 class="register-title">DAFTAR AKUN</h2>
-                        <p class="text-gray-600 small">Silakan lengkapi data diri Anda</p>
+                        <p class="text-gray-600 small">Lengkapi data untuk akses sistem</p>
                     </div>
 
                     @if ($errors->any())
                         <div class="alert alert-danger py-2 px-3 border-0 small mb-4" style="border-radius: 10px;">
-                            <ul class="mb-0">
+                            <ul class="mb-0 px-3">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
                         </div>
                     @endif
-                   
+                    
                     <form class="user" action="{{ route('register') }}" method="POST">
                         @csrf
-                       
+                        
                         <div class="form-group-custom">
                             <input type="text" name="name" class="form-control form-control-user" placeholder="Nama Lengkap" value="{{ old('name') }}" required>
                             <i class="fas fa-user input-icon"></i>
@@ -164,7 +162,7 @@
                             <i class="fas fa-lock input-icon"></i>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-daftar btn-block shadow">
+                        <button type="submit" class="btn btn-primary btn-daftar btn-block shadow mt-4">
                             Daftar Sekarang
                         </button>
                     </form>
@@ -174,11 +172,9 @@
 
         <div class="text-center mt-4">
             <a class="login-link" href="/">
-                Sudah punya akun? <span style="text-decoration: underline;">Masuk di sini</span>
+                Sudah punya akun? <span>Masuk di sini</span>
             </a>
-            <div class="footer-text">
-                 2026 Desa Sirnamekar
-            </div>
+            
         </div>
     </div>
 

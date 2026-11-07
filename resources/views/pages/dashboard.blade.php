@@ -1,77 +1,132 @@
 @extends('layout.app')
 
 @section('content')
-{{-- Header Dashboard yang Lebih Ringkas --}}
-<div class="d-sm-flex align-items-center justify-content-between mb-3">
-    <h1 class="h4 mb-0 text-gray-800 font-weight-bold">
-        <i class="fas fa-tachometer-alt mr-2 text-primary"></i>
-        Dashboard {{ auth()->user()->role_id == 1 ? 'Administrator' : 'Warga Desa' }}
-    </h1>
-</div>
+<div class="container-fluid">
 
-@if(auth()->user()->role_id == 1)
-    {{-- ============================ DASHBOARD ADMIN (OPTIMAL) ============================ --}}
-    <div class="row">
-        <div class="col-xl-6 col-md-6 mb-3">
-            <div class="card border-left-primary shadow-sm h-100 py-2">
-                <div class="card-body py-2">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2 px-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Penduduk</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $total_penduduk }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6 col-md-6 mb-3">
-            <div class="card border-left-success shadow-sm h-100 py-2">
-                <div class="card-body py-2">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2 px-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Aduan Selesai</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $aduan_selesai }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Title Halaman -->
+    <div class="mb-4">
+        <h1 class="h3 text-gray-800 font-weight-bold">Dashboard Utama</h1>
     </div>
 
+    <!-- Ringkasan Statistik -->
+    <div class="row">
+
+        <!-- Total Ternak -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Populasi Ternak</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalTernak ?? $totalPopulasi ?? 0 }} Ekor</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ternak Layak Jual -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Ternak Layak Jual</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalLayak ?? $layakJual ?? 0 }} Ekor</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Komoditas Ternak -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Komoditas Ternak</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        {{ $totalSapi ?? 0 }} Sapi | {{ $totalDomba ?? 0 }} Domba
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimasi Nilai Aset -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Estimasi Nilai Aset</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        Rp {{ number_format($totalAset ?? $nilaiAset ?? 0, 0, ',', '.') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabel Data Ternak Terbaru -->
     <div class="card shadow-sm mb-4">
         <div class="card-header py-3 bg-white d-flex align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-list mr-2"></i>Aduan Warga Terbaru
-            </h6>
+            <h6 class="m-0 font-weight-bold text-primary">Data Ternak Terbaru</h6>
+            <a href="{{ route('data-ternak.index') }}" class="text-primary small font-weight-bold">Lihat Semua Data &rarr;</a>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                    <thead class="bg-light text-gray-700">
+                <table class="table table-hover mb-0" style="font-size: 0.9rem;">
+                    <thead class="thead-light">
                         <tr>
-                            <th class="px-4 border-0">Pelapor</th>
-                            <th class="border-0">Isi Aduan</th>
-                            <th class="text-center border-0">Status</th>
+                            <th>ID Ternak</th>
+                            <th>Komoditas</th>
+                            <th>Ras / Varian</th>
+                            <th>Berat Panen</th>
+                            <th>Status Kelayakan</th>
+                            <th>Estimasi Harga</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($recent_aduan as $aduan)
+                        @php
+                            $dataList = $latestTernak ?? $ternaksTerbaru ?? [];
+                        @endphp
+
+                        @forelse($dataList as $item)
+                        @php
+                            // Cek Status Kelayakan
+                            $isLayak = ($item->kelayakan ?? '') == 'Layak' || ($item->kelayakan ?? 0) == 1;
+
+                            // Cek Jenis Komoditas
+                            $jenis = $item->jenis ?? $item->jenis_komoditas ?? 0;
+                            $isSapi = ($jenis == 0 || $jenis === '0' || strtolower($jenis) === 'sapi');
+                        @endphp
                         <tr>
-                            <td class="px-4 font-weight-bold text-gray-800">{{ $aduan->resident->nama ?? 'Anonim' }}</td>
-                            <td class="text-muted">{{ Str::limit($aduan->description, 60) }}</td>
-                            <td class="text-center">
-                                <span class="badge badge-pill badge-warning px-3 py-1 text-uppercase" style="font-size: 0.7rem;">{{ $aduan->status }}</span>
+                            <!-- ID Ternak -->
+                            <td class="font-weight-bold text-primary">
+                                {{ $item->kode_ternak ?? 'TRK-'.sprintf('%03d', $item->id) }}
+                            </td>
+
+                            <!-- Komoditas Teks -->
+                            <td>{{ $isSapi ? 'Sapi' : 'Domba' }}</td>
+
+                            <!-- Ras / Varian -->
+                            <td>{{ $item->ras ?? $item->ras_varian ?? '-' }}</td>
+
+                            <!-- Berat Panen -->
+                            <td>{{ $item->berat ?? $item->berat_panen ?? 0 }} kg</td>
+
+                            <!-- Status Kelayakan -->
+                            <td>
+                                @if($isLayak)
+                                    <span class="badge badge-success px-2 py-1">LAYAK JUAL</span>
+                                @else
+                                    <span class="badge badge-danger px-2 py-1">BELUM LAYAK</span>
+                                @endif
+                            </td>
+
+                            <!-- Estimasi Harga (Kondisi Belum Layak = Strip) -->
+                            <td class="font-weight-bold">
+                                @if($isLayak && ($item->harga_jual ?? 0) > 0)
+                                    <span class="text-success">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="3" class="text-center py-4 text-muted small">Belum ada aduan masuk.</td></tr>
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Belum ada data ternak terdaftar.</td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -79,107 +134,5 @@
         </div>
     </div>
 
-@else
-    {{-- ============================ DASHBOARD WARGA (OPTIMAL) ============================ --}}
-    <div class="row mb-3">
-        <div class="col-lg-12">
-            <div class="card bg-gradient-primary shadow-sm border-0">
-                <div class="card-body py-3 px-4 text-white">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h5 class="font-weight-bold mb-1">Halo, {{ auth()->user()->name }}!</h5>
-                            <p class="small mb-0 text-white-50">Pantau status layanan dan pengaduan Anda di sini.</p>
-                        </div>
-                        <div class="col-auto d-none d-md-block">
-                            <i class="fas fa-user-circle fa-2x text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-xl-4 col-md-6 mb-3">
-            <div class="card border-left-info shadow-sm h-100 py-2">
-                <div class="card-body py-2">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2 px-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Pengajuan Saya</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $total_pengajuan_saya ?? 0 }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-6 mb-3">
-            <div class="card border-left-danger shadow-sm h-100 py-2">
-                <div class="card-body py-2">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2 px-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Aduan Anda</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $total_aduan_saya ?? 0 }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-12 mb-3">
-            <div class="card border-left-success shadow-sm h-100 py-2">
-                <div class="card-body py-2">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2 px-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Layanan Selesai</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $layanan_selesai ?? 0 }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
-            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-2"></i>Status Pengajuan Terakhir</h6>
-            <a href="/Ajuan" class="btn btn-sm btn-primary px-3 shadow-sm">Lihat Semua</a>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                    <thead class="bg-light text-gray-700">
-                        <tr>
-                            <th class="px-4 border-0">Jenis Dokumen</th>
-                            <th class="border-0">Tanggal</th>
-                            <th class="text-center border-0">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recent_pengajuan ?? [] as $item)
-                        <tr>
-                            <td class="px-4 font-weight-bold text-gray-800">{{ $item->jenis_dokumen }}</td>
-                            <td class="text-muted">{{ $item->created_at->format('d M Y') }}</td>
-                            <td class="text-center">
-                                <span class="badge badge-pill badge-{{ $item->status == 'selesai' ? 'success' : 'warning' }} px-3 py-1 text-uppercase" style="font-size: 0.7rem;">{{ $item->status }}</span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="3" class="text-center py-4 text-muted small">Belum ada pengajuan terbaru.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-@endif
+</div>
 @endsection

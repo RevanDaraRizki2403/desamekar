@@ -1,75 +1,89 @@
 <?php
 
-use App\Http\Controllers\AduanController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ResidentController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PemeriksaanController;
+use App\Http\Controllers\PrediksiController;
+use App\Http\Controllers\TernakController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\PengajuanDokumenController;
-use App\Models\Resident;
-use App\Models\Aduan;
-use App\Models\PengajuanDokumen;
 use Illuminate\Support\Facades\Route;
 
-/* --- AUTH --- */
+// --------------------------------------------------------------------------
+// Guest Routes (Autentikasi)
+// --------------------------------------------------------------------------
 Route::get('/', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout.post');
-Route::get('/register', [AuthController::class, 'registerView'])->name('registerView');
-Route::post('/register', [AuthController::class, 'register'])->name('register');
 
-/* --- FITUR UTAMA (Wajib Login) --- */
+// --------------------------------------------------------------------------
+// Authenticated Routes
+// --------------------------------------------------------------------------
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', function () {
-        $residentId = Auth::user()->resident->id ?? null;
-        $total_penduduk = Resident::count();
-        $aduan_selesai  = Aduan::where('status', 'completed')->count();
-        $recent_aduan   = Aduan::with('resident')->latest()->paginate(5, ['*'], 'page_aduan');
+    // DASHBOARD MASING-MASING AKTOR
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/karyawan/dashboard', [DashboardController::class, 'index'])->name('karyawan.dashboard');
+    Route::get('/manager/dashboard', [DashboardController::class, 'index'])->name('manager.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        $total_pengajuan_saya = PengajuanDokumen::where('resident_id', $residentId)->count();
-        $total_aduan_saya     = Aduan::where('resident_id', $residentId)->count();
-        $layanan_selesai      = PengajuanDokumen::where('resident_id', $residentId)->where('status', 'selesai')->count();
-        $recent_pengajuan     = PengajuanDokumen::where('resident_id', $residentId)->latest()->paginate(5, ['*'], 'page_ajuan');
+    // DATA MASTER: DATA TERNAK
+    Route::get('/data-ternak/download-template', [TernakController::class, 'downloadTemplate'])->name('data-ternak.download-template'); // Route Unduh Template Excel
+    Route::post('/data-ternak/import', [TernakController::class, 'importExcel'])->name('data-ternak.import');
+    Route::get('/data-ternak', [TernakController::class, 'index'])->name('data-ternak.index');
+    Route::get('/data-ternak/create', [TernakController::class, 'create'])->name('data-ternak.create');
+    Route::post('/data-ternak', [TernakController::class, 'store'])->name('data-ternak.store');
+    Route::delete('/data-ternak/{id}', [TernakController::class, 'destroy'])->name('data-ternak.destroy');
 
-        return view('pages.dashboard', compact(
-            'total_penduduk', 'aduan_selesai', 'recent_aduan',
-            'total_pengajuan_saya', 'total_aduan_saya', 'layanan_selesai', 'recent_pengajuan'
-        ));
-    })->name('dashboard');
+    // Safety Redirect jika ada yang memanggil route edit lama
+    Route::get('/data-ternak/{id}/edit', function() {
+        return redirect()->route('data-ternak.index');
+    })->name('data-ternak.edit');
 
-    /* --- KHUSUS ADMIN --- */
-    Route::middleware('role:Admin')->group(function () {
-        Route::get('/resident', [ResidentController::class, 'index'])->name('resident.index');
-        Route::get('/resident/create', [ResidentController::class, 'create'])->name('resident.create');
-        Route::post('/resident', [ResidentController::class, 'store'])->name('resident.store');
-        Route::get('/resident/{id}/edit', [ResidentController::class, 'edit'])->name('resident.edit');
-        Route::put('/resident/{id}', [ResidentController::class, 'update'])->name('resident.update');
-        Route::delete('/resident/{id}', [ResidentController::class, 'destroy'])->name('resident.destroy');
+    // Alias Route Ternak
+    Route::get('/ternak/download-template', [TernakController::class, 'downloadTemplate'])->name('ternak.download-template'); // Alias Route Unduh Template
+    Route::post('/ternak/import', [TernakController::class, 'importExcel'])->name('ternak.import');
+    Route::get('/ternak', [TernakController::class, 'index'])->name('ternak.index');
+    Route::get('/ternak/create', [TernakController::class, 'create'])->name('ternak.create');
+    Route::post('/ternak/store', [TernakController::class, 'store'])->name('ternak.store');
+    Route::delete('/ternak/{id}', [TernakController::class, 'destroy'])->name('ternak.destroy');
 
-        Route::get('/account-request', [UserController::class, 'account_request_view'])->name('account.request');
-        Route::post('/account-request/approval/{id}', [UserController::class, 'account_approval'])->name('account.approval');
-        Route::get('/account-list', [UserController::class, 'account_list_view'])->name('account.list');
-        Route::post('/account-list/aktifkan/{id}', [UserController::class, 'account_aktifkan'])->name('account.aktifkan');
-        Route::post('/account-list/nonaktif/{id}', [UserController::class, 'account_nonaktif'])->name('account.nonaktif');
+    Route::get('/ternak/{id}/edit', function() {
+        return redirect()->route('data-ternak.index');
+    })->name('ternak.edit');
 
-        // Pengajuan Dokumen Masuk (Admin)
-        Route::get('/pengajuan-masuk', [PengajuanDokumenController::class, 'adminIndex'])->name('pengajuan.masuk');
-        Route::post('/admin/pengajuan/update/{id}', [PengajuanDokumenController::class, 'updateStatus'])->name('pengajuan.update_status');
-    });
+    // DATA MASTER: DATA PEMERIKSAAN
+    Route::get('/data-pemeriksaan', [PemeriksaanController::class, 'index'])->name('pemeriksaan.index');
+    Route::post('/data-pemeriksaan', [PemeriksaanController::class, 'store'])->name('pemeriksaan.store');
+    Route::get('/data-pemeriksaan/{id}/edit', [PemeriksaanController::class, 'edit'])->name('pemeriksaan.edit');
+    Route::put('/data-pemeriksaan/{id}', [PemeriksaanController::class, 'update'])->name('pemeriksaan.update');
+    Route::delete('/data-pemeriksaan/{id}', [PemeriksaanController::class, 'destroy'])->name('pemeriksaan.destroy');
 
-    /* --- KHUSUS USER (WARGA) --- */
-    Route::middleware('role:User')->group(function () {
-        Route::get('/pengajuan-dokumen', [PengajuanDokumenController::class, 'index'])->name('pengajuan.index');
-        Route::get('/pengajuan-dokumen/create', [PengajuanDokumenController::class, 'create'])->name('pengajuan.create');
-        Route::post('/pengajuan-dokumen/store', [PengajuanDokumenController::class, 'store'])->name('pengajuan.store');
-    });
+    // ANALISIS & PREDIKSI (RANDOM FOREST)
+    Route::get('/prediksi-kelayakan', [PrediksiController::class, 'index'])->name('prediksi.index');
+    Route::get('/prediksi-kelayakan/detail/{id?}', [PrediksiController::class, 'detail'])->name('prediksi.detail');
+    Route::post('/prediksi-kelayakan', [PrediksiController::class, 'proses'])->name('prediksi.proses');
+    Route::get('/riwayat-prediksi', [PrediksiController::class, 'riwayat'])->name('prediksi.riwayat');
 
-    /* --- ADMIN & USER --- */
-    Route::middleware('role:Admin,User')->group(function () {
-        Route::get('/Aduan', [AduanController::class, 'index'])->name('Aduan.index');
-        Route::get('/Aduan/create', [AduanController::class, 'create'])->name('Aduan.create');
-        Route::post('/Aduan', [AduanController::class, 'store'])->name('Aduan.store');
-        Route::delete('/pengajuan-dokumen/{id}', [PengajuanDokumenController::class, 'destroy'])->name('pengajuan.destroy');
-    });
+    // EVALUASI DATASET & MODEL ML
+    Route::get('/dataset-evaluasi', [LaporanController::class, 'evaluasi'])->name('prediksi.dataset-evaluasi');
+    Route::get('/evaluasi', [LaporanController::class, 'evaluasi'])->name('evaluasi.index'); // Alias route evaluasi
 
-}); // Penutup Middleware Auth
+    // MODUL LAPORAN
+    Route::get('/laporan-kelayakan', [LaporanController::class, 'kelayakan'])->name('laporan.kelayakan');
+    Route::get('/laporan-kelayakan/pdf', [LaporanController::class, 'cetakPdf'])->name('laporan.pdf');
+    Route::get('/laporan-harga', [LaporanController::class, 'harga'])->name('laporan.harga');
+    
+    // Laporan Data Ternak (dengan alias)
+    Route::get('/laporan-data-ternak', [LaporanController::class, 'dataTernak'])->name('laporan.data-ternak');
+    Route::get('/laporan-ternak', [LaporanController::class, 'dataTernak'])->name('laporan.ternak');
+
+    // Laporan Transaksi
+    Route::get('/laporan-transaksi', [LaporanController::class, 'transaksi'])->name('laporan.transaksi');
+
+    // MANAJEMEN AKUN
+    Route::get('/account-list', [UserController::class, 'account_list_view'])->name('account.list');
+    Route::post('/account-list', [UserController::class, 'store'])->name('account.store');
+    Route::post('/account/update-status/{id}', [UserController::class, 'update_account_status'])->name('account.update_status');
+
+});

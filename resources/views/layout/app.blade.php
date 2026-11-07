@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Desa Sirnamekar</title>
+    <title>SI PETERNAKAN - PT. Sumber Makanan Sehat</title>
 
     <link href="{{asset('templet/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -14,50 +14,50 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-    /* 1. Memperlebar Sidebar agar tidak terlihat kurus */
-    .sidebar {
-        width: 15rem !important; /* Nilai 15rem agar sidebar terlihat lebar dan pas */
-    }
-    
-    /* 2. Memperbesar Text Menu Sidebar agar mudah dibaca */
-    .sidebar .nav-item .nav-link span {
-        font-size: 0.95rem; 
-        font-weight: 700;
-    }
+        /* Ubah warna background sidebar menjadi gradient login (Biru ke Hijau) */
+        .bg-gradient-primary, 
+        .sidebar {
+            background-color: #2e59d9 !important;
+            background-image: linear-gradient(180deg, #2e59d9 0%, #1cc88a 100%) !important;
+            background-size: cover !important;
+            width: 15rem !important; 
+        }
 
-    /* 3. Memperbesar Ikon Sidebar */
-    .sidebar .nav-item .nav-link i {
-        font-size: 1.1rem;
-        margin-right: 0.75rem;
-    }
+        .sidebar .nav-item .nav-link span {
+            font-size: 0.95rem; 
+            font-weight: 700;
+        }
 
-    /* 4. Memperbesar Judul Heading (Kategori) Sidebar */
-    .sidebar .sidebar-heading {
-        font-size: 0.8rem;
-        font-weight: 800;
-        letter-spacing: 1px;
-        color: rgba(255,255,255,0.8) !important;
-        padding-top: 1rem;
-    }
+        .sidebar .nav-item .nav-link i {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+        }
 
-    /* 5. Mempercantik Card Dashboard agar tidak melompong */
-    .card {
-        border: none;
-        border-radius: 12px;
-        transition: transform 0.2s;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1) !important;
-    }
-    .card:hover {
-        transform: translateY(-5px); /* Efek melayang saat kursor menyentuh card */
-    }
+        .sidebar .sidebar-heading {
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.8) !important;
+            padding-top: 1rem;
+        }
 
-    /* 6. Memperbaiki Tabel agar terlihat padat dan rapi */
-    .table td, .table th {
-        font-size: 0.95rem;
-        padding: 1rem;
-        vertical-align: middle !important;
-    }
-</style>
+        .card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1) !important;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px); 
+        }
+
+        .table td, .table th {
+            font-size: 0.95rem;
+            padding: 1rem;
+            vertical-align: middle !important;
+        }
+    </style>
 </head>
 
 <body id="page-top">
@@ -69,7 +69,6 @@
                 @include('layout.navbar')
 
                 <div class="container-fluid">
-                    {{-- Menambahkan padding atas agar konten tidak nempel ke navbar --}}
                     <div class="pt-3">
                         @yield('content')
                     </div>
@@ -84,6 +83,7 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <!-- Modal Logout -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form action="{{ route('logout.post') }}" method="post"> 
@@ -97,7 +97,7 @@
                     </div>
                     <div class="modal-body">Apakah anda yakin ingin keluar dari aplikasi?</div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Logout</button>
                     </div>
                 </div>
@@ -110,7 +110,6 @@
     <script src="{{asset('templet/vendor/jquery-easing/jquery.easing.min.js')}}"></script>
     <script src="{{asset('templet/js/sb-admin-2.min.js')}}"></script>
 
-    {{-- Script Tambahan untuk Auto-Hide Alert SweetAlert jika ada --}}
     <script>
         @if(session('success'))
             Swal.fire({

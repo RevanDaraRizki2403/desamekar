@@ -20,7 +20,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'no_hp',
+        'alamat',
         'password',
+        'role_id',
+        'status',
     ];
 
     /**
@@ -46,9 +50,11 @@ class User extends Authenticatable
         ];
     }
 
-    public function resident()
-{
-    return $this->hasOne(Resident::class);
-}
-
+    /**
+     * Relasi ke model Role
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }

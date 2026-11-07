@@ -2,111 +2,81 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     public function login()
     {
         if (Auth::check()) {
-            return back();
+            return $this->redirectBasedOnRole(Auth::user());
         }
 
+        // Menunjuk ke resources/views/pages/auth/login.blade.php
         return view('pages.auth.login');
     }
 
     public function authenticate(Request $request)
     {
         if (Auth::check()) {
-            return back();
+            return $this->redirectBasedOnRole(Auth::user());
         }
 
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // 1. Cek apakah status akun sudah approved
+            if (isset($user->status) && $user->status !== 'approved') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Akun Anda belum disetujui atau sedang tidak aktif.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
 
-            $userStatus = Auth::user()->status;
-
-            if ($userStatus === 'submitted') {
-                $this->_logout($request);
-                return back()->withErrors([
-                    'email' => 'Akun anda masih menunggu persetujuan admin',
-                ]);
-            }
-
-            if ($userStatus === 'rejected') {
-                $this->_logout($request);
-                return back()->withErrors([
-                    'email' => 'Akun anda telah ditolak admin',
-                ]);
-            }
-
-            // ✅ STATUS APPROVED → LOGIN BERHASIL
-            return redirect()->intended('dashboard');
+            // 2. Redirect ke dashboard sesuai role_id
+            return $this->redirectBasedOnRole($user);
         }
 
-       
         return back()->withErrors([
-            'email' => 'Email atau password salah',
-        ]);
+            'email' => 'Email atau password salah.',
+        ])->onlyInput('email');
     }
 
-    public function registerView()
+    /**
+     * Helper function untuk mengarahkan user berdasarkan role_id
+     */
+    private function redirectBasedOnRole($user)
     {
-        if (Auth::check()) {
-            return back();
+        switch ((int) $user->role_id) {
+            case 1:
+                return redirect()->route('admin.dashboard');   // Admin Farming
+            case 2:
+                return redirect()->route('karyawan.dashboard'); // Karyawan Farm
+            case 3:
+                return redirect()->route('manager.dashboard');  // Manager
+            default:
+                return redirect()->route('dashboard');
         }
-
-        return view('pages.auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        if (Auth::check()) {
-            return back();
-        }
-
-        $request->validate([
-            'name' => ['required'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'min:6'],
-        ]);
-
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->role_id = 2; // warga
-        $user->status = 'submitted'; // menunggu verifikasi admin
-        $user->save();
-
-        return redirect('/')->with(
-            'sukses',
-            'Berhasil mendaftar, akun menunggu persetujuan admin'
-        );
-    }
-
-    public function _logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
     }
 
     public function logout(Request $request)
     {
-        if (!Auth::check()) {
-            return redirect('/');
-        }
+        Auth::logout();
 
-        $this->_logout($request);
-        return redirect('/');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }

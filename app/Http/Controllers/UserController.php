@@ -2,101 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule; 
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function account_request_view()
-    {
-        $users = User::where('status', 'submitted')->get();
-        $residents = Resident::where('user_id', null)->get();
-
-        return view('pages.account-request.index', compact('users', 'residents'));
-    }
-
-    public function account_approval(Request $request, $id)
-{
-    $request->validate([
-        'for' => ['required', Rule::in(['approve', 'reject'])],
-        'resident_id' => ['nullable', 'exists:residents,id']
-    ]);
-
-    $user = User::findOrFail($id);
-
-    if ($request->for === 'approve') {
-        $user->status = 'approved';
-
-        if ($request->filled('resident_id')) {
-            $resident = Resident::findOrFail($request->resident_id);
-            $resident->user_id = $user->id;
-            $resident->save();
-        }
-
-    } else {
-        $user->status = 'rejected';
-    }
-
-    $user->save();
-
-    return redirect()
-        ->route('account.request')
-        ->with('success', 'Status akun berhasil diperbarui');
-}
-
-    /*
-    |--------------------------------------------------------------------------
-    | ACCOUNT LIST (DAFTAR AKUN PENDUDUK)
-    |--------------------------------------------------------------------------
-    */
     public function account_list_view()
     {
-        // PERBAIKAN: Ganti get() menjadi paginate(5)
-        // Menampilkan akun warga (role_id 2) yang sudah diproses (bukan submitted)
         $users = User::where('role_id', 2)
-            ->where('status', '!=', 'submitted')
-            ->latest() // Menampilkan akun terbaru di atas
-            ->paginate(5); 
+            ->latest()
+            ->paginate(10);
 
         return view('pages.account-list.index', compact('users'));
     }
 
-    public function account_aktifkan(Request $request, $id)
+    public function store(Request $request)
     {
-        // Menambahkan validasi keamanan 'activate' sesuai instruksi video
         $request->validate([
-            'for' => ['required', Rule::in(['activate'])]
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'no_hp'    => 'nullable|string|max:20',
+            'alamat'   => 'nullable|string',
+        ]);
+
+        User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id'  => 2, // Role 2 = Petugas Kandang / Karyawan Farm
+            'status'   => 'approved',
+            'no_hp'    => $request->no_hp,
+            'alamat'   => $request->alamat,
+        ]);
+
+        return back()->with('success', 'Petugas Kandang baru berhasil ditambahkan!');
+    }
+
+    public function update_account_status(Request $request, $id)
+    {
+        $request->validate([
+            'for' => ['required', Rule::in(['activate', 'deactivate'])],
         ]);
 
         $user = User::findOrFail($id);
-        $user->status = 'approved';
+        $action = $request->for;
+
+        if ($action === 'activate') {
+            $user->status = 'approved';
+            $message = 'Akun petugas berhasil diaktifkan kembali.';
+        } elseif ($action === 'deactivate') {
+            $user->status = 'rejected';
+            $message = 'Akun petugas berhasil dinonaktifkan.';
+        }
+
         $user->save();
 
-        return redirect()->route('account.list')
-            ->with('success', 'Akun berhasil diaktifkan');
+        return back()->with('success', $message);
     }
-
-    public function account_nonaktif(Request $request, $id)
-    {
-        // Menambahkan validasi keamanan 'deactivate' sesuai instruksi video
-        $request->validate([
-            'for' => ['required', Rule::in(['deactivate'])]
-        ]);
-
-        $user = User::findOrFail($id);
-        $user->status = 'rejected';
-        $user->save();
-
-        return redirect()->route('account.list')
-            ->with('success', 'Akun berhasil dinonaktifkan');
-    }
-
-    public function show($id)
-{
-    $user = User::findOrFail($id);
-    return view('pages.user.show', compact('user'));
-}
-
 }
